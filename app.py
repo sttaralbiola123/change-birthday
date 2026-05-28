@@ -52,16 +52,11 @@ def validate_birthday(month, day, year):
     return True
 
 def method_1_direct_api(cookie, password, month, day, year):
-    """
-    Method 1: Direct API - accountinformation.roblox.com
-    Most reliable and official method
-    """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://accountinformation.roblox.com/v1/birthdate"
     
     req_headers = headers.copy()
@@ -81,256 +76,145 @@ def method_1_direct_api(cookie, password, month, day, year):
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 1 (Direct API - accountinformation.roblox.com)"
+        "method": "Method 1 (Direct API)"
     }
 
 def method_2_settings_api(cookie, password, month, day, year):
-    """
-    Method 2: Settings API - settings.roblox.com
-    Alternative settings endpoint
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://settings.roblox.com/v1/user-settings"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "birthMonth": month,
-        "birthDay": day,
-        "birthYear": year
-    }
-    
+    payload = {"birthMonth": month, "birthDay": day, "birthYear": year}
     response = requests.patch(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 2 (Settings API - settings.roblox.com)"
+        "method": "Method 2 (Settings API)"
     }
 
 def method_3_account_preferences(cookie, password, month, day, year):
-    """
-    Method 3: Account Preferences API
-    Uses account preferences endpoint
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://accountpreferences.roblox.com/v1/preferences"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "preferences": {
-            "birthdate": {
-                "month": month,
-                "day": day,
-                "year": year
-            }
-        },
-        "password": password
-    }
-    
+    payload = {"preferences": {"birthdate": {"month": month, "day": day, "year": year}}, "password": password}
     response = requests.put(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 3 (Account Preferences API)"
+        "method": "Method 3 (Account Preferences)"
     }
 
 def method_4_profile_update(cookie, password, month, day, year):
-    """
-    Method 4: Profile Update API
-    Updates profile with birthday information
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://profile.roblox.com/v1/update-profile"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "birthdate": f"{year}-{month:02d}-{day:02d}",
-        "password": password
-    }
-    
+    payload = {"birthdate": f"{year}-{month:02d}-{day:02d}", "password": password}
     response = requests.post(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 4 (Profile Update API)"
+        "method": "Method 4 (Profile Update)"
     }
 
 def method_5_user_settings(cookie, password, month, day, year):
-    """
-    Method 5: User Settings API
-    Alternative user settings endpoint
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://users.roblox.com/v1/user-settings"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "birthDate": {
-            "month": month,
-            "day": day,
-            "year": year
-        },
-        "password": password
-    }
-    
+    payload = {"birthDate": {"month": month, "day": day, "year": year}, "password": password}
     response = requests.put(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 5 (User Settings API)"
+        "method": "Method 5 (User Settings)"
     }
 
-def method_6_mobile_api(cookie, password, month, day, year):
-    """
-    Method 6: Mobile API Endpoint
-    Mobile-specific API with mobile headers
-    """
-    headers = {
-        "User-Agent": "Roblox/1.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
-        "X-Roblox-Device-Type": "iOS"
-    }
-    
+def method_6_mobile_ios(cookie, password, month, day, year):
+    headers = {"User-Agent": "Roblox/1.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)", "X-Roblox-Device-Type": "iOS"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://mobile.roblox.com/v1/birthdate"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "birthMonth": month,
-        "birthDay": day,
-        "birthYear": year,
-        "password": password
-    }
-    
+    payload = {"birthMonth": month, "birthDay": day, "birthYear": year, "password": password}
     response = requests.post(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 6 (Mobile API - iOS)"
+        "method": "Method 6 (Mobile iOS)"
     }
 
-def method_7_android_api(cookie, password, month, day, year):
-    """
-    Method 7: Android Mobile API
-    Android-specific mobile endpoint
-    """
-    headers = {
-        "User-Agent": "Roblox/1.0 (Linux; Android 11)",
-        "X-Roblox-Device-Type": "Android"
-    }
-    
+def method_7_mobile_android(cookie, password, month, day, year):
+    headers = {"User-Agent": "Roblox/1.0 (Linux; Android 11)", "X-Roblox-Device-Type": "Android"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://mobile.roblox.com/v1/birthdate"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/json"
     
-    payload = {
-        "birthMonth": month,
-        "birthDay": day,
-        "birthYear": year,
-        "password": password
-    }
-    
+    payload = {"birthMonth": month, "birthDay": day, "birthYear": year, "password": password}
     response = requests.post(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 7 (Mobile API - Android)"
+        "method": "Method 7 (Mobile Android)"
     }
 
 def method_8_form_data(cookie, password, month, day, year):
-    """
-    Method 8: Form Data (URL Encoded)
-    Uses form data instead of JSON
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://accountinformation.roblox.com/v1/birthdate"
     
     req_headers = headers.copy()
     req_headers["X-CSRF-Token"] = csrf_token
     req_headers["Content-Type"] = "application/x-www-form-urlencoded"
     
-    data = {
-        "birthMonth": str(month),
-        "birthDay": str(day),
-        "birthYear": str(year),
-        "password": password
-    }
-    
+    data = {"birthMonth": str(month), "birthDay": str(day), "birthYear": str(year), "password": password}
     response = requests.post(url, cookies=cookies, headers=req_headers, data=data, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 8 (Form Data - URL Encoded)"
+        "method": "Method 8 (Form Data)"
     }
 
 def method_9_multipart_form(cookie, password, month, day, year):
-    """
-    Method 9: Multipart Form Data
-    Uses multipart/form-data format
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://accountinformation.roblox.com/v1/birthdate"
     
     req_headers = headers.copy()
@@ -342,27 +226,18 @@ def method_9_multipart_form(cookie, password, month, day, year):
         "birthYear": (None, str(year)),
         "password": (None, password)
     }
-    
     response = requests.post(url, cookies=cookies, headers=req_headers, files=files, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 9 (Multipart Form Data)"
+        "method": "Method 9 (Multipart Form)"
     }
 
 def method_10_graphql(cookie, password, month, day, year):
-    """
-    Method 10: GraphQL API Mutation
-    Uses GraphQL mutation endpoint
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     csrf_token, cookies = get_csrf_token(cookie, headers)
-    
     url = "https://graphql.roblox.com/v1/graphql"
     
     req_headers = headers.copy()
@@ -371,23 +246,15 @@ def method_10_graphql(cookie, password, month, day, year):
     
     payload = {
         "query": "mutation UpdateBirthday($input: UpdateBirthdayInput!) { updateBirthday(input: $input) { success } }",
-        "variables": {
-            "input": {
-                "birthMonth": month,
-                "birthDay": day,
-                "birthYear": year,
-                "password": password
-            }
-        }
+        "variables": {"input": {"birthMonth": month, "birthDay": day, "birthYear": year, "password": password}}
     }
-    
     response = requests.post(url, cookies=cookies, headers=req_headers, json=payload, timeout=10)
     
     return {
         "success": response.status_code == 200,
         "status_code": response.status_code,
         "response": response.json() if response.status_code == 200 else response.text,
-        "method": "Method 10 (GraphQL API Mutation)"
+        "method": "Method 10 (GraphQL)"
     }
 
 @bot.event
@@ -423,8 +290,8 @@ async def changebirthday(
             3: method_3_account_preferences,
             4: method_4_profile_update,
             5: method_5_user_settings,
-            6: method_6_mobile_api,
-            7: method_7_android_api,
+            6: method_6_mobile_ios,
+            7: method_7_mobile_android,
             8: method_8_form_data,
             9: method_9_multipart_form,
             10: method_10_graphql
@@ -437,24 +304,17 @@ async def changebirthday(
         result = methods[method](cookie, password, month, day, year)
         
         if result["success"]:
-            await interaction.followup.send(
-                f"✅ **Success!**
-"
-                f"Method: {result['method']}
-"
-                f"Birthday changed to **{month}/{day}/{year}**."
-            )
+            msg = f"✅ **Success!**
+Method: {result['method']}
+Birthday changed to **{month}/{day}/{year}**."
+            await interaction.followup.send(msg)
         else:
             error_msg = result["response"] if isinstance(result["response"], str) else str(result["response"])
-            await interaction.followup.send(
-                f"❌ **Failed!**
-"
-                f"Method: {result['method']}
-"
-                f"Status: `{result['status_code']}`
-"
-                f"Message: `{error_msg}`"
-            )
+            msg = f"❌ **Failed!**
+Method: {result['method']}
+Status: `{result['status_code']}`
+Message: `{error_msg}`"
+            await interaction.followup.send(msg)
 
     except Exception as e:
         await interaction.followup.send(f"⚠️ **Error:**
@@ -476,7 +336,6 @@ async def tryall(
     day: int,
     year: int
 ):
-    """Try all 10 methods and report which ones work"""
     await interaction.response.defer(ephemeral=True)
 
     try:
@@ -495,8 +354,8 @@ async def tryall(
             ("Method 3", method_3_account_preferences),
             ("Method 4", method_4_profile_update),
             ("Method 5", method_5_user_settings),
-            ("Method 6", method_6_mobile_api),
-            ("Method 7", method_7_android_api),
+            ("Method 6", method_6_mobile_ios),
+            ("Method 7", method_7_mobile_android),
             ("Method 8", method_8_form_data),
             ("Method 9", method_9_multipart_form),
             ("Method 10", method_10_graphql)
