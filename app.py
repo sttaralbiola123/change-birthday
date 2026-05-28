@@ -1,75 +1,89 @@
 import os
+import discord
+from discord import app_commands
 import requests
-from flask import Flask, jsonify
 
-app = Flask(__name__)
+class RobloxBot(discord.Client):
+    def __init__(self):
+        intents = discord.Intents.default()
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
 
-# Kukunin nito ang values mula sa Environment Variables ng Render mamaya
-COOKIE_VALUE = os.environ.get("ROBLOSECURITY")
-PASSWORD = os.environ.get("ROBLOX_PASSWORD")
+    async def setup_hook(self):
+        # I-sync ang slash commands sa Discord server mo
+        await self.tree.sync()
 
-cookies = {
-    ".ROBLOSECURITY": COOKIE_VALUE
-}
+bot = RobloxBot()
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
-def get_csrf_token():
+def get_csrf_token(raw_cookie, headers):
     url = "https://auth.roblox.com/v2/logout"
+    
+    # Linisin ang cookie para sigurado (tatanggapin kahit may ".ROBLOSECURITY=" o wala)
+    clean_cookie = raw_cookie.replace(".ROBLOSECURITY=", "").strip()
+    cookies = {".ROBLOSECURITY": clean_cookie}
+    
     response = requests.post(url, cookies=cookies, headers=headers)
     csrf_token = response.headers.get("x-csrf-token")
+    
     if not csrf_token:
-        raise Exception("Failed to fetch CSRF token. Pakisuri kung valid ang cookie mo.")
-    return csrf_token
+        raise Exception("Failed to fetch CSRF token. Suriin kung tama/buhay ang cookie mo.")
+        
+    return csrf_token, cookies
 
-@app.route('/')
-def home():
-    return jsonify({
-        "status": "Online",
-        "message": "Buhay ang server! Bisitahin ang /run para i-trigger ang birthday changer."
-    })
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} | Bot is online!")
 
-@app.route('/run')
-def run_script():
-    # Siguraduhing may laman ang credentials
-    if not COOKIE_VALUE or not PASSWORD:
-        return jsonify({"error": "Missing Environment Variables sa Render!"}), 400
+# Slash command na may dalawang parameters (cookie at password)
+@bot.tree.command(name="change", description="Baguhin ang Roblox birthday sa June 5, 2010")
+@app_commands.describe(
+    cookie="I-paste dito ang iyong .ROBLOSECURITY cookie",
+    password="Ang password ng iyong Roblox account"
+)
+async def change(interaction: discord.Interaction, cookie: str, password: str):
+    # 'ephemeral=True' para ikaw lang ang makakita ng response sa chat, iwas silip sa iba
+    await interaction.response.defer(ephemeral=True)
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
 
     try:
-        csrf_token = get_csrf_token()
+        # Kunin ang CSRF token gamit ang cookie na binigay mo sa command
+        csrf_token, cookies = get_csrf_token(cookie, headers)
+        
         url = "https://accountinformation.roblox.com/v1/birthdate"
         
         req_headers = headers.copy()
         req_headers["X-CSRF-Token"] = csrf_token
         req_headers["Content-Type"] = "application/json"
         
-        # Pwede mo nang baguhin ang birthday details dito
+        # Hardcoded details base sa hiling mo (June 5, 2010)
         payload = {
-            "birthMonth": 1,
-            "birthDay": 15,
-            "birthYear": 2000,
-            "password": PASSWORD
+            "birthMonth": 6,   # June
+            "birthDay": 5,     # 5
+            "birthYear": 2010, # 2010
+            "password": password
         }
         
         response = requests.post(url, cookies=cookies, headers=req_headers, json=payload)
         
-        # Subukang i-parse ang response bilang json kung maaari
-        try:
-            roblox_resp = response.json()
-        except:
-            roblox_resp = response.text
-
-        return jsonify({
-            "status_code": response.status_code,
-            "roblox_response": roblox_resp
-        })
+        if response.status_code == 200:
+            await interaction.followup.send("✅ **Success!** Nabago na ang iyong Roblox birthday sa June 5, 2010.")
+        else:
+            try:
+                err_msg = response.json().get("errors", [{}])[0].get("message", "Unknown error")
+            except:
+                err_msg = response.text
+            await interaction.followup.send(f"❌ **Failed!** Status Code: {response.status_code}\nResponse: `{err_msg}`")
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        await interaction.followup.send(f"⚠️ **Error:** {str(e)}")
 
 if __name__ == "__main__":
-    # Awtomatikong gagamitin ang port na ibibigay ng Render
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # Ang DISCORD_BOT_TOKEN lang ang itatago sa Environment Variables para mag-run ang bot
+    TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+    if TOKEN:
+        bot.run(TOKEN)
+    else:
+        print("Error: Walang DISCORD_BOT_TOKEN environment variable na nahanap!")
